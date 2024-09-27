@@ -1,30 +1,143 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <Navbar />
+  <Event :text="text[eventTextNum]" />
+  <SearchBar :data="data_temp" @searchMovie="searchMovie($event)"/>
+  <p>
+    <button @click="showAllMovie">전체보기</button>
+  </p>
+  <Movies
+    :data="data_temp"
+    @openModal="isModal = true; selectedMovie = $event"
+    @increaseLike="increaseLike($event)"
+  />
+  <Modal
+    :data="data"
+    :isModal="isModal"
+    :selectedMovie="selectedMovie"
+    @closeModal="isModal = false"
+    />
 </template>
 
+<script>
+import data from './assets/movies'
+import Navbar from './components/Navbar.vue'
+import Event from './components/Event.vue'
+import Modal from './components/Modal.vue'
+import Movies from './components/Movies.vue'
+import SearchBar from './components/SearchBar.vue'
+console.log(data)
+
+export default {
+  components: {
+    Navbar,
+    Event,
+    Modal,
+    Movies,
+    SearchBar
+  },
+  name: 'APP',
+  data () {
+    return {
+      isModal: false,
+      data: data,
+      data_temp: [...data],
+      selectedMovie: 0,
+      text: ['NEPLIX 흑백요리사: 요리 계급 전쟁', '디즈니 100주년 기념작, 위시', '그날, 대한민국의 운명이 바뀌었다, 서울의 봄'],
+      eventTextNum: 0,
+      interval: null
+    }
+  },
+  methods: {
+    increaseLike (id) {
+      this.data.forEach(movie => {
+        if (movie.id === id) {
+          movie.like += 1
+        }
+      })
+    }, // increaseLike (id) {
+    //   const movie = this.data.find(movie => {
+    //     if (movie.id === id) { // 공백 추가
+    //       movie.like += 1
+    //     }
+    //   })
+    // },
+    searchMovie (title) {
+      this.data_temp = this.data.filter(movie => movie.title.includes(title))
+    },
+    showAllMovie () {
+      this.data_temp = [...this.data]
+    }
+  },
+  mounted () {
+    console.log('mounted')
+    this.interval = setInterval(() => {
+      if (this.eventTextNum === this.text.length - 1) {
+        this.eventTextNum = 0
+      } else {
+        this.eventTextNum += 1
+      }
+    }, 3000)
+  },
+  unmounted () {
+    clearInterval(this.interval)
+  }
+}
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+ * {
+  box-sizing: border-box;
+  margin: 0;
+ }
+ body {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 20px;
+ }
+ h1, h2, h3 {
+  margin-bottom: 1rem;
+ }
+ p {
+  margin-bottom: 0.5rem;
+ }
+ button {
+  margin-right: 10px;
+  margin-top: 1rem;
+ }
+ .item {
+  width: 100%;
+  border: 1px solid #ccc;
+  display: flex;
+  margin-bottom: 20px;
+  padding: 1rem;
+ }
+ .item figure {
+  width: 30%;
+  margin-right: 1rem;
+ }
+ .item img {
+  width: 100%;
+ }
+ .item .info {
+  width: 100%;
+ }
 
-nav {
-  padding: 30px;
-}
+ .modal {
+  background: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
+ .modal .inner {
+  background: #fff;
+  width: 80%;
+  padding: 20px;
+  border-radius: 10px;
+ }
 </style>
